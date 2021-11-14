@@ -1,0 +1,14 @@
+{
+  "name": "blockchain-example",
+  "version": "1.0.0",
+  "description": "This is a project which will help understanding the basics of a blockchain ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Antonio Mora",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
