@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test a form submit</title>
+    <style>
+        .backend-error {
+            background-color: tomato;
+            color:white;
+        }
+        .backend-success {
+            background-color:yellowgreen;
+            color: black;
+        }
+    </style>
+    <script>
+        function handleSubmit(event) {
+            if (event && event.target && event.target.elements) {
+                event.preventDefault();
+                let { elements } = event.target;
+                let filteredControls = filterControlsCollection(elements);
+                let payload = buildPayload(filteredControls);
+                handleBackendRequest(payload);
+            }
+        }
+
+        function filterControlsCollection(rawControls) {
+            let requiredControls = ['name', 'lastName', 'gender'];
+            let cleanControls = {};
+            Object.keys(rawControls).filter(rawCtrl => requiredControls.includes(rawCtrl)).forEach(key => {
+                cleanControls[key] = rawControls[key];
+            });
+            return cleanControls;
+        }
+
+        function buildPayload (controls) {
+            // get value from controls
+            let keys = Object.keys(controls);
+            return keys.reduce((payloadObject, currentKey) => {
+                payloadObject[currentKey] = controls[currentKey].value;
+                return payloadObject;
+            }, {});
+        }
+
+        function handleBackendRequest(payload) {
+            let xmlRequest = new XMLHttpRequest();
+            let url = 'http://localhost:3000/user';
+            xmlRequest.open('POST', url, true);
+            xmlRequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+            xmlRequest.send(JSON.stringify(payload));
+
+            xmlRequest.onloadend = function () {
+                let  { statusText, responseText, status } = this;
+                renderResponse(statusText, responseText,status);
+            }
+        }
+
+        function renderResponse(statusText, responseText, status) {
+            let element = document.getElementById('backendResponse');
+            element.innerHTML = statusText + ': ' + responseText;
+            if(status === 200) {
+                element.classList.add('backend-success');
+            } else {
+                element.classList.add('backend-error')
+            }
+        }
+    </script>
+</head>
+<body>
+    <header><h1>Test a form submit event</h1></header>
+    <section>
+        <form onsubmit="handleSubmit(event)">
+            <fieldset>
+                <legend>
+                    Enter your name here
+                </legend>
+                <label for="name">Name <abbr title="required" aria-label="required">*</abbr></label>
+                <input type="text" name="name" id="name"/>
+            </fieldset>
+
+            <fieldset style="margin: 1.5rem .1rem">
+                <legend>
+                    Enter the lastname
+                </legend>
+                <label for="lastName">Last name <abbr title="required" aria-label="required">*</abbr></label>
+                <input type="text" name="lastName" id="lastName"/>
+            </fieldset>
+
+            <fieldset style="margin-bottom: 1.5rem;">
+                <legend>Select your gender</legend>
+                <label for="men">Men</label>
+                <input type="radio" name="gender" id="men" value="men"/>
+                <label for="women">Women</label>
+                <input type="radio" name="gender" id="women" value="women"/>
+                <label for="noBinary">No binary</label>
+                <input type="radio" name="gender" id="noBinary" value="noBinary"/>
+            </fieldset>
+
+            <input type="submit" value="Save user"></input>
+        </form>
+        <div style="margin: 1rem">
+            <span id="backendResponse" class="span-response"></span>
+        </div>
+    </section>
+</body>
+</html>
